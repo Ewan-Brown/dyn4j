@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dyn4j.collision.Collisions;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -45,7 +46,7 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public final class Island<T extends PhysicsBody> {
+public final class Island<F extends BodyFixture, T extends PhysicsBody<F>> {
 	/** The list of {@link PhysicsBody}s on this {@link Island} */
 	final List<T> bodies;
 
@@ -53,7 +54,7 @@ public final class Island<T extends PhysicsBody> {
 	final List<Joint<T>> joints;
 	
 	/** The list of {@link ContactConstraint}s on this {@link Island} */
-	final List<ContactConstraint<T>> contactConstraints;
+	final List<ContactConstraint<F, T>> contactConstraints;
 
 	/**
 	 * Default constructor.
@@ -77,7 +78,7 @@ public final class Island<T extends PhysicsBody> {
 		// estimate sizes while we stand up the island
 		this.bodies = new ArrayList<T>(bodyCount);
 		this.joints = new ArrayList<Joint<T>>(jointCount);
-		this.contactConstraints = new ArrayList<ContactConstraint<T>>(contactConstraintCount);
+		this.contactConstraints = new ArrayList<ContactConstraint<F, T>>(contactConstraintCount);
 	}
 
 	/**
@@ -101,7 +102,7 @@ public final class Island<T extends PhysicsBody> {
 	 * Adds the given {@link ContactConstraint} to the {@link ContactConstraint} list.
 	 * @param contactConstraint the {@link ContactConstraint}
 	 */
-	public void add(ContactConstraint<T> contactConstraint) {
+	public void add(ContactConstraint<F, T> contactConstraint) {
 		this.contactConstraints.add(contactConstraint);
 	}
 	
@@ -121,7 +122,7 @@ public final class Island<T extends PhysicsBody> {
 	 * @param step the time step information
 	 * @param settings the current world settings
 	 */
-	public void solve(ContactConstraintSolver<T> solver, Vector2 gravity, TimeStep step, Settings settings) {
+	public void solve(ContactConstraintSolver<F, T> solver, Vector2 gravity, TimeStep step, Settings settings) {
 		// the number of solver iterations
 		final int velocitySolverIterations = settings.getVelocityConstraintSolverIterations();
 		final int positionSolverIterations = settings.getPositionConstraintSolverIterations();
@@ -133,7 +134,7 @@ public final class Island<T extends PhysicsBody> {
 		
 		// integrate the velocities
 		for (int i = 0; i < size; i++) {
-			PhysicsBody body = this.bodies.get(i);
+		 PhysicsBody<F> body = this.bodies.get(i);
 			body.integrateVelocity(gravity, step, settings);
 		}
 		
@@ -161,7 +162,7 @@ public final class Island<T extends PhysicsBody> {
 		
 		// integrate the positions
 		for (int i = 0; i < size; i++) {
-			PhysicsBody body = this.bodies.get(i);
+		 PhysicsBody<F> body = this.bodies.get(i);
 			// this works for static bodies since they don't move
 			// and this works for kinematic/dynamic bodies because
 			// they will only be added to one island
@@ -192,7 +193,7 @@ public final class Island<T extends PhysicsBody> {
 			double minSleepTime = Double.MAX_VALUE;
 			// check for sleep-able bodies
 			for (int i = 0; i < size; i++) {
-				PhysicsBody body = this.bodies.get(i);
+			 PhysicsBody<F> body = this.bodies.get(i);
 				
 				double bodySleepTime = body.updateAtRestTime(step, settings);
 				if (bodySleepTime < 0) {
@@ -205,7 +206,7 @@ public final class Island<T extends PhysicsBody> {
 			// check the min sleep time
 			if (minSleepTime >= sleepTime && positionConstraintsSolved) {
 				for (int i = 0; i < size; i++) {
-					PhysicsBody body = this.bodies.get(i);
+				 PhysicsBody<F> body = this.bodies.get(i);
 					body.setAtRest(true);
 				}
 			}

@@ -25,6 +25,7 @@
 package org.dyn4j.world;
 
 import org.dyn4j.collision.CollisionPair;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.ContactConstraint;
@@ -36,7 +37,7 @@ import org.dyn4j.dynamics.contact.ContactConstraint;
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface ContactCollisionData<T extends PhysicsBody> extends CollisionData<T, BodyFixture> {
+public interface ContactCollisionData<F extends BodyFixture, T extends PhysicsBody<F>> extends CollisionData<T, F> {
 	/**
 	 * Returns true if the {@link CollisionPair} is a contact constraint collision.
 	 * @see #setContactConstraintCollision(boolean)
@@ -57,5 +58,5 @@ public interface ContactCollisionData<T extends PhysicsBody> extends CollisionDa
 	 * Returns the {@link ContactConstraint}.
 	 * @return {@link ContactConstraint}
 	 */
-	public ContactConstraint<T> getContactConstraint();
+	public ContactConstraint<F, T> getContactConstraint();
 }

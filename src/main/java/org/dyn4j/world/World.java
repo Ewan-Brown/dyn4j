@@ -44,7 +44,7 @@ import org.dyn4j.dynamics.joint.Joint;
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class World<T extends PhysicsBody> extends AbstractPhysicsWorld<T, WorldCollisionData<T>> {
+public class World<F extends BodyFixture, T extends PhysicsBody<F>> extends AbstractPhysicsWorld<F, T, WorldCollisionData<F, T>> {
 	/**
 	 * Default constructor.
 	 */
@@ -65,7 +65,7 @@ public class World<T extends PhysicsBody> extends AbstractPhysicsWorld<T, WorldC
 	 * @see org.dyn4j.world.AbstractCollisionWorld#createCollisionData(org.dyn4j.collision.CollisionPair)
 	 */
 	@Override
-	protected WorldCollisionData<T> createCollisionData(CollisionPair<CollisionItem<T, BodyFixture>> pair) {
-		return new WorldCollisionData<T>(pair);
+	protected WorldCollisionData<F, T> createCollisionData(CollisionPair<CollisionItem<T, F>> pair) {
+		return new WorldCollisionData<F, T>(pair);
 	}
 }

@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -38,7 +39,7 @@ import org.dyn4j.dynamics.joint.Joint;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class DestructionListenerAdapter<T extends PhysicsBody> implements DestructionListener<T> {
+public class DestructionListenerAdapter<F extends BodyFixture, T extends PhysicsBody<F>> implements DestructionListener<F, T> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.DestructionListener#destroyed(org.dyn4j.dynamics.joint.Joint)
 	 */
@@ -55,6 +56,6 @@ public class DestructionListenerAdapter<T extends PhysicsBody> implements Destru
 	 * @see org.dyn4j.world.listener.DestructionListener#destroyed(org.dyn4j.dynamics.contact.ContactConstraint)
 	 */
 	@Override
-	public void destroyed(ContactConstraint<T> contactConstraint) {}
+	public void destroyed(ContactConstraint<F, T> contactConstraint) {}
 
 }

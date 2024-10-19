@@ -28,6 +28,7 @@ import org.dyn4j.DataContainer;
 import org.dyn4j.Epsilon;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Mass;
@@ -44,62 +45,13 @@ import org.dyn4j.geometry.Vector2;
  * @version 5.0.2
  * @since 1.0.0
  */
-public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, Shiftable, DataContainer, Ownable {
+public interface PhysicsBody<T extends BodyFixture> extends CollisionBody<T>, Transformable, Shiftable, DataContainer, Ownable {
 	/** The default linear damping; value = {@link #DEFAULT_LINEAR_DAMPING} */
 	public static final double DEFAULT_LINEAR_DAMPING = 0.0;
 	
 	/** The default angular damping; value = {@link #DEFAULT_ANGULAR_DAMPING} */
 	public static final double DEFAULT_ANGULAR_DAMPING 	= 0.01;
-	
-	/**
-	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
-	 * adds it to the {@link PhysicsBody}, and returns it for configuration.
-	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #updateMass()}
-	 * or {@link #setMass(MassType)} method to compute the new total
-	 * {@link Mass} for the body.
-	 * <p>
-	 * This is a convenience method for setting the density of a {@link BodyFixture}.
-	 * <p>
-	 * Calling this method will reset the body's rest state to not at rest.
-	 * @param convex the {@link Convex} {@link Shape} to add to the {@link PhysicsBody}
-	 * @param density the density of the shape in kg/m<sup>2</sup>; in the range (0.0, &infin;]
-	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link PhysicsBody}
-	 * @throws NullPointerException if convex is null
-	 * @throws IllegalArgumentException if density is less than or equal to zero; if friction or restitution is less than zero
-	 * @see #addFixture(Convex)
-	 * @see #addFixture(Convex, double, double, double)
-	 * @since 3.1.5
-	 */
-	public BodyFixture addFixture(Convex convex, double density);
-	
-	/**
-	 * Creates a {@link BodyFixture} for the given {@link Convex} {@link Shape},
-	 * adds it to the {@link PhysicsBody}, and returns it for configuration.
-	 * <p>
-	 * After adding or removing fixtures make sure to call the {@link #updateMass()}
-	 * or {@link #setMass(MassType)} method to compute the new total
-	 * {@link Mass} for the body.
-	 * <p>
-	 * This is a convenience method for setting the properties of a {@link BodyFixture}.
-	 * Use the {@link BodyFixture#DEFAULT_DENSITY}, {@link BodyFixture#DEFAULT_FRICTION},
-	 * and {@link BodyFixture#DEFAULT_RESTITUTION} values if you need to only set one
-	 * of these properties.  
-	 * <p>
-	 * Calling this method will reset the body's rest state to not at rest.
-	 * @param convex the {@link Convex} {@link Shape} to add to the {@link PhysicsBody}
-	 * @param density the density of the shape in kg/m<sup>2</sup>; in the range (0.0, &infin;]
-	 * @param friction the coefficient of friction; in the range [0.0, &infin;]
-	 * @param restitution the coefficient of restitution; in the range [0.0, &infin;]
-	 * @return {@link BodyFixture} the fixture created using the given {@link Shape} and added to the {@link PhysicsBody}
-	 * @throws NullPointerException if convex is null
-	 * @throws IllegalArgumentException if density is less than or equal to zero; if friction or restitution is less than zero
-	 * @see #addFixture(Convex)
-	 * @see #addFixture(Convex, double)
-	 * @since 3.1.1
-	 */
-	public BodyFixture addFixture(Convex convex, double density, double friction, double restitution);
-	
+
 	/**
 	 * This is a shortcut method for the {@link #setMass(org.dyn4j.geometry.MassType)}
 	 * method that will use the current mass type as the mass type and
@@ -110,7 +62,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @since 3.2.0
 	 * @see #setMass(org.dyn4j.geometry.MassType)
 	 */
-	public PhysicsBody updateMass();
+	public PhysicsBody<T> updateMass();
 	
 	/**
 	 * This method should be called after fixture modification
@@ -126,7 +78,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @param type the mass type
 	 * @return {@link PhysicsBody} this body
 	 */
-	public PhysicsBody setMass(MassType type);
+	public PhysicsBody<T> setMass(MassType type);
 	
 	/**
 	 * Explicitly sets this {@link PhysicsBody}'s mass information.
@@ -136,7 +88,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @return {@link PhysicsBody} this body
 	 * @throws NullPointerException if the given mass is null
 	 */
-	public PhysicsBody setMass(Mass mass);
+	public PhysicsBody<T> setMass(Mass mass);
 	
 	/**
 	 * Sets the {@link org.dyn4j.geometry.MassType} of this {@link PhysicsBody}.
@@ -154,7 +106,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @throws NullPointerException if the given mass type is null
 	 * @since 2.2.3
 	 */
-	public PhysicsBody setMassType(MassType type);
+	public PhysicsBody<T> setMassType(MassType type);
 	
 	/**
 	 * Returns this {@link PhysicsBody}'s mass information.
@@ -180,7 +132,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @throws NullPointerException if force is null
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyForce(Vector2 force);
+	public PhysicsBody<T> applyForce(Vector2 force);
 	
 	/**
 	 * Applies the given {@link Force} to this {@link PhysicsBody}.
@@ -200,7 +152,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @throws NullPointerException if force is null
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyForce(Force force);
+	public PhysicsBody<T> applyForce(Force force);
 	
 	/**
 	 * Applies the given torque about the center of this {@link PhysicsBody}.
@@ -217,7 +169,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @return {@link PhysicsBody} this body
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyTorque(double torque);
+	public PhysicsBody<T> applyTorque(double torque);
 	
 	/**
 	 * Applies the given {@link Torque} to this {@link PhysicsBody}.
@@ -235,7 +187,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @throws NullPointerException if torque is null
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyTorque(Torque torque);
+	public PhysicsBody<T> applyTorque(Torque torque);
 
 	/**
 	 * Applies the given force to this {@link PhysicsBody} at the
@@ -260,7 +212,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @throws NullPointerException if force or point is null
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyForce(Vector2 force, Vector2 point);
+	public PhysicsBody<T> applyForce(Vector2 force, Vector2 point);
 	
 	/**
 	 * Applies a linear impulse to this {@link PhysicsBody} at its center of mass.
@@ -280,7 +232,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @throws NullPointerException if impulse is null
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyImpulse(Vector2 impulse);
+	public PhysicsBody<T> applyImpulse(Vector2 impulse);
 	
 	/**
 	 * Applies an angular impulse to this {@link PhysicsBody} about its center of mass.
@@ -297,7 +249,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @return {@link PhysicsBody} this body
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyImpulse(double impulse);
+	public PhysicsBody<T> applyImpulse(double impulse);
 	
 	/**
 	 * Applies an impulse to this {@link PhysicsBody} at the given point.
@@ -320,7 +272,7 @@ public interface PhysicsBody extends CollisionBody<BodyFixture>, Transformable, 
 	 * @throws NullPointerException if impulse or point is null
 	 * @since 3.1.1
 	 */
-	public PhysicsBody applyImpulse(Vector2 impulse, Vector2 point);
+	public PhysicsBody<T> applyImpulse(Vector2 impulse, Vector2 point);
 	
 	/**
 	 * Clears the last time step's force on the {@link PhysicsBody}.

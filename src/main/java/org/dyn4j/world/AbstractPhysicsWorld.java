@@ -96,7 +96,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
  */
-public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends AbstractCollisionWorld<T, BodyFixture, V> implements PhysicsWorld<T, V>, Shiftable, DataContainer {
+public abstract class AbstractPhysicsWorld<F extends BodyFixture, T extends PhysicsBody<F>, V extends ContactCollisionData<F, T>> extends AbstractCollisionWorld<T, F, V> implements PhysicsWorld<F, T, V>, Shiftable, DataContainer {
 	/** The dynamics settings for this world */
 	protected final Settings settings;
 	
@@ -110,7 +110,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	protected ValueMixer valueMixer;
 	
 	/** The {@link ContactConstraintSolver} */
-	protected ContactConstraintSolver<T> contactConstraintSolver;
+	protected ContactConstraintSolver<F, T> contactConstraintSolver;
 	
 	/** The {@link TimeOfImpactSolver} */
 	protected TimeOfImpactSolver<T> timeOfImpactSolver;
@@ -127,16 +127,16 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	// listeners
 	
 	/** The list of {@link ContactListener}s */
-	protected final List<ContactListener<T>> contactListeners;
+	protected final List<ContactListener<F, T>> contactListeners;
 
 	/** The unmodifiable list of {@link ContactListener}s */
-	protected final List<ContactListener<T>> contactListenersUnmodifiable;
+	protected final List<ContactListener<F, T>> contactListenersUnmodifiable;
 	
 	/** The list of {@link DestructionListener}s */
-	protected final List<DestructionListener<T>> destructionListeners;
+	protected final List<DestructionListener<F, T>> destructionListeners;
 	
 	/** The unmodifiable list of {@link DestructionListener}s */
-	protected final List<DestructionListener<T>> destructionListenersUnmodifiable;
+	protected final List<DestructionListener<F, T>> destructionListenersUnmodifiable;
 	
 	/** The list of {@link TimeOfImpactListener}s */
 	protected final List<TimeOfImpactListener<T>> timeOfImpactListeners;
@@ -145,10 +145,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	protected final List<TimeOfImpactListener<T>> timeOfImpactListenersUnmodifiable;
 	
 	/** The list of {@link StepListener}s */
-	protected final List<StepListener<T>> stepListeners;
+	protected final List<StepListener<F, T>> stepListeners;
 	
 	/** The unmodifiable list of {@link StepListener}s */
-	protected final List<StepListener<T>> stepListenersUnmodifiable;
+	protected final List<StepListener<F, T>> stepListenersUnmodifiable;
 	
 	// state data
 
@@ -161,7 +161,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	// collision tracking
 	
 	/** The constraint graph between bodies */
-	protected final ConstraintGraph<T> constraintGraph;
+	protected final ConstraintGraph<F, T> constraintGraph;
 	
 	/** A temporary list of only the {@link ContactConstraint} collisions from the last detection; cleared and refilled each step */
 	protected final List<V> contactCollisions;
@@ -203,10 +203,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// override the broadphase filter
 		// the CollisionWorld uses the DefaultBroadphaseFilter but 
 		// the PhysicsWorld needs to use the DetectBroadphaseFilter
-		this.broadphaseFilter = new PhysicsBodyBroadphaseCollisionDataFilter<T>(this);
+		this.broadphaseFilter = new PhysicsBodyBroadphaseCollisionDataFilter<>(this);
 		this.valueMixer = ValueMixer.DEFAULT_MIXER;
-		this.contactConstraintSolver = new SequentialImpulses<T>();
-		this.timeOfImpactSolver = new ForceCollisionTimeOfImpactSolver<T>();
+		this.contactConstraintSolver = new SequentialImpulses<>();
+		this.timeOfImpactSolver = new ForceCollisionTimeOfImpactSolver<>();
 		
 		// build the CCD broadphase detector
 		final BroadphaseFilter<T> broadphaseFilter = new CollisionBodyBroadphaseFilter<T>();
@@ -222,10 +222,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.joints = new ArrayList<Joint<T>>(initialJointCapacity);
 		this.jointsUnmodifiable = Collections.unmodifiableList(this.joints);
 		
-		this.contactListeners = new ArrayList<ContactListener<T>>();
-		this.destructionListeners = new ArrayList<DestructionListener<T>>();
+		this.contactListeners = new ArrayList<ContactListener<F, T>>();
+		this.destructionListeners = new ArrayList<DestructionListener<F, T>>();
 		this.timeOfImpactListeners = new ArrayList<TimeOfImpactListener<T>>();
-		this.stepListeners = new ArrayList<StepListener<T>>();
+		this.stepListeners = new ArrayList<StepListener<F, T>>();
 		
 		this.contactListenersUnmodifiable = Collections.unmodifiableList(this.contactListeners);
 		this.destructionListenersUnmodifiable = Collections.unmodifiableList(this.destructionListeners);
@@ -235,7 +235,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		this.time = 0.0;
 		
 		int estimatedCollisionPairs = Collisions.getEstimatedCollisionPairs(initialBodyCapacity);
-		this.constraintGraph = new ConstraintGraph<T>(initialBodyCapacity, initialJointCapacity);
+		this.constraintGraph = new ConstraintGraph<F, T>(initialBodyCapacity, initialJointCapacity);
 		this.contactCollisions = new ArrayList<V>(estimatedCollisionPairs);
 		this.ccdCollisionData = new LinkedHashSet<CollisionPair<T>>();
 		this.updateRequired = true;
@@ -456,7 +456,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @param node the node
 	 * @param notify true if destruction should emit notifications
 	 */
-	protected void destroyJoints(ConstraintGraphNode<T> node, boolean notify) {
+	protected void destroyJoints(ConstraintGraphNode<F, T> node, boolean notify) {
 		T body = node.body;
 		
 		// JOINT CLEANUP
@@ -480,7 +480,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				// wake up the other body
 				other.setAtRest(false);
 				// remove the joint from the constraint list of the other node
-				ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
+				ConstraintGraphNode<F, T> otherNode = this.constraintGraph.getNode(other);
 				if (otherNode != null) {
 					otherNode.joints.remove(joint);
 				}
@@ -491,7 +491,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			
 			// notify of the destroyed joint
 			if (notify) {
-				for (DestructionListener<T> dl : this.destructionListeners) {
+				for (DestructionListener<F, T> dl : this.destructionListeners) {
 					dl.destroyed(joint);
 				}
 			}
@@ -510,7 +510,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @param fixture the fixture of the contacts to destroy; null means to destroy all
 	 * @param notify true if destruction should emit notifications
 	 */
-	protected void destroyContacts(ConstraintGraphNode<T> node, BodyFixture fixture, boolean notify) {
+	protected void destroyContacts(ConstraintGraphNode<F, T> node, F fixture, boolean notify) {
 		T body = node.body;
 		
 		// CONTACT CLEANUP
@@ -523,9 +523,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		// the entire set of pairs checking for this body - which isn't particularly
 		// efficient.
 		
-		Iterator<ContactConstraint<T>> it = node.contactConstraints.iterator();
+		Iterator<ContactConstraint<F, T>> it = node.contactConstraints.iterator();
 		while (it.hasNext()) {
-			ContactConstraint<T> contactConstraint = it.next();
+			ContactConstraint<F, T> contactConstraint = it.next();
 
 			// don't do anything with contact constraints that aren't involving the
 			// given fixture
@@ -554,13 +554,13 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				for (int k = 0; k < cSize; k++) {
 					Contact contact = contacts.get(k);
 					// call the destruction listeners
-					for (ContactListener<T> cl : this.contactListeners) {
+					for (ContactListener<F, T> cl : this.contactListeners) {
 						cl.destroyed(data, contact);
 					}
 				}
 				
 				// notify destruction of collision info
-				for (DestructionListener<T> dl : this.destructionListeners) {
+				for (DestructionListener<F, T> dl : this.destructionListeners) {
 					dl.destroyed(contactConstraint);
 				}
 			}
@@ -573,7 +573,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			}
 			
 			// remove it from the other node
-			ConstraintGraphNode<T> otherNode = this.constraintGraph.getNode(other);
+			ConstraintGraphNode<F, T> otherNode = this.constraintGraph.getNode(other);
 			if (otherNode != null) {
 				otherNode.contactConstraints.remove(contactConstraint);
 			}
@@ -610,7 +610,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// remove the body from the ccd broadphase
 			this.ccdBroadphase.remove(body);
 			// remove from the interaction graph
-			ConstraintGraphNode<T> node = this.constraintGraph.removeBody(body);
+			ConstraintGraphNode<F, T> node = this.constraintGraph.removeBody(body);
 			
 			// JOINT CLEANUP
 			this.destroyJoints(node, notify);
@@ -695,7 +695,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// NOTE: we do a remove here because this will remove the edges
 			// from the graph so that we don't report destruction for joints
 			// and contact constraints twice
-			ConstraintGraphNode<T> node = this.constraintGraph.removeBody(body);
+			ConstraintGraphNode<F, T> node = this.constraintGraph.removeBody(body);
 			
 			// JOINT CLEANUP
 			this.destroyJoints(node, notify);
@@ -704,7 +704,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			this.destroyContacts(node, null, notify);
 
 			// notify of the destroyed body
-			for (DestructionListener<T> dl : this.destructionListeners) {
+			for (DestructionListener<F, T> dl : this.destructionListeners) {
 				dl.destroyed(body);
 			}
 		}
@@ -751,7 +751,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 //			b2.setAtRest(false);
 
 			if (notify) {
-				for (DestructionListener<T> dl : this.destructionListeners) {
+				for (DestructionListener<F, T> dl : this.destructionListeners) {
 					dl.destroyed(joint);
 				}
 			}
@@ -765,11 +765,11 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.AbstractCollisionWorld#handleFixtureRemoved(org.dyn4j.collision.CollisionBody, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	protected void handleFixtureRemoved(T body, BodyFixture fixture) {
+	protected void handleFixtureRemoved(T body, F fixture) {
 		super.handleFixtureRemoved(body, fixture);
 
 		// check the constraint graph for contacts to end
-		ConstraintGraphNode<T> node = this.constraintGraph.getNode(body);
+		ConstraintGraphNode<F, T> node = this.constraintGraph.getNode(body);
 		if (node != null) {
 			// CONTACT CLEANUP
 			this.destroyContacts(node, fixture, true);
@@ -784,7 +784,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		super.handleAllFixturesRemoved(body);
 		
 		// check the constraint graph for contacts to end
-		ConstraintGraphNode<T> node = this.constraintGraph.getNode(body);
+		ConstraintGraphNode<F, T> node = this.constraintGraph.getNode(body);
 		if (node != null) {
 			// CONTACT CLEANUP
 			this.destroyContacts(node, null, true);
@@ -862,7 +862,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#setContactConstraintSolver(org.dyn4j.dynamics.contact.ContactConstraintSolver)
 	 */
 	@Override
-	public void setContactConstraintSolver(ContactConstraintSolver<T> constraintSolver) {
+	public void setContactConstraintSolver(ContactConstraintSolver<F, T> constraintSolver) {
 		if (constraintSolver == null) 
 			throw new ArgumentNullException("constraintSolver");
 		
@@ -873,7 +873,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#getContactConstraintSolver()
 	 */
 	@Override
-	public ContactConstraintSolver<T> getContactConstraintSolver() {
+	public ContactConstraintSolver<F, T> getContactConstraintSolver() {
 		return this.contactConstraintSolver;
 	}
 	
@@ -1034,7 +1034,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#getContacts(org.dyn4j.dynamics.PhysicsBody)
 	 */
 	@Override
-	public List<ContactConstraint<T>> getContacts(T body) {
+	public List<ContactConstraint<F, T>> getContacts(T body) {
 		return this.constraintGraph.getContacts(body);
 	}
 	
@@ -1082,7 +1082,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#getContactListeners()
 	 */
 	@Override
-	public List<ContactListener<T>> getContactListeners() {
+	public List<ContactListener<F, T>> getContactListeners() {
 		return this.contactListenersUnmodifiable;
 	}
 	
@@ -1090,7 +1090,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#getDestructionListeners()
 	 */
 	@Override
-	public List<DestructionListener<T>> getDestructionListeners() {
+	public List<DestructionListener<F, T>> getDestructionListeners() {
 		return this.destructionListenersUnmodifiable;
 	}
 	
@@ -1098,7 +1098,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#getStepListeners()
 	 */
 	@Override
-	public List<StepListener<T>> getStepListeners() {
+	public List<StepListener<F, T>> getStepListeners() {
 		return this.stepListenersUnmodifiable;
 	}
 	
@@ -1159,7 +1159,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#removeContactListener(org.dyn4j.world.listener.ContactListener)
 	 */
 	@Override
-	public boolean removeContactListener(ContactListener<T> listener) {
+	public boolean removeContactListener(ContactListener<F, T> listener) {
 		return this.contactListeners.remove(listener);
 	}
 	
@@ -1167,7 +1167,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#removeDestructionListener(org.dyn4j.world.listener.DestructionListener)
 	 */
 	@Override
-	public boolean removeDestructionListener(DestructionListener<T> listener) {
+	public boolean removeDestructionListener(DestructionListener<F, T> listener) {
 		return this.destructionListeners.remove(listener);
 	}
 	
@@ -1175,7 +1175,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#removeStepListener(org.dyn4j.world.listener.StepListener)
 	 */
 	@Override
-	public boolean removeStepListener(StepListener<T> listener) {
+	public boolean removeStepListener(StepListener<F, T> listener) {
 		return this.stepListeners.remove(listener);
 	}
 	
@@ -1191,7 +1191,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#addContactListener(org.dyn4j.world.listener.ContactListener)
 	 */
 	@Override
-	public boolean addContactListener(ContactListener<T> listener) {
+	public boolean addContactListener(ContactListener<F, T> listener) {
 		return this.contactListeners.add(listener);
 	}
 	
@@ -1199,7 +1199,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#addDestructionListener(org.dyn4j.world.listener.DestructionListener)
 	 */
 	@Override
-	public boolean addDestructionListener(DestructionListener<T> listener) {
+	public boolean addDestructionListener(DestructionListener<F, T> listener) {
 		return this.destructionListeners.add(listener);
 	}
 	
@@ -1207,7 +1207,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @see org.dyn4j.world.PhysicsWorld#addStepListener(org.dyn4j.world.listener.StepListener)
 	 */
 	@Override
-	public boolean addStepListener(StepListener<T> listener) {
+	public boolean addStepListener(StepListener<F, T> listener) {
 		return this.stepListeners.add(listener);
 	}
 	
@@ -1224,14 +1224,14 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 */
 	protected void step() {
 		// get all the step listeners
-		List<StepListener<T>> stepListeners = this.stepListeners;
-		List<ContactListener<T>> contactListeners = this.contactListeners;
+		List<StepListener<F, T>> stepListeners = this.stepListeners;
+		List<ContactListener<F, T>> contactListeners = this.contactListeners;
 		
 		int sSize = stepListeners.size();
 		
 		// notify the step listeners
 		for (int i = 0; i < sSize; i++) {
-			StepListener<T> sl = stepListeners.get(i);
+			StepListener<F, T> sl = stepListeners.get(i);
 			sl.begin(this.timeStep, this);
 		}
 		
@@ -1241,7 +1241,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			this.detect();
 			// notify that an update was performed
 			for (int i = 0; i < sSize; i++) {
-				StepListener<T> sl = stepListeners.get(i);
+				StepListener<F, T> sl = stepListeners.get(i);
 				sl.updatePerformed(this.timeStep, this);
 			}
 			// set the update required flag to false
@@ -1250,10 +1250,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify of all the contacts that will be solved and all the sensed contacts
 		if (contactListeners.size() > 0) {
-			for (ContactCollisionData<T> data : this.contactCollisions) {
-				ContactConstraint<T> cc = data.getContactConstraint();
+			for (ContactCollisionData<F, T> data : this.contactCollisions) {
+				ContactConstraint<F, T> cc = data.getContactConstraint();
 				for (Contact contact : cc.getContacts()) {
-					for (ContactListener<T> listener : contactListeners) {
+					for (ContactListener<F, T> listener : contactListeners) {
 						listener.preSolve(data, contact);
 					}
 				}
@@ -1278,10 +1278,10 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify of the all solved contacts
 		if (contactListeners.size() > 0) {
-			for (ContactCollisionData<T> data : this.contactCollisions) {
-				ContactConstraint<T> cc = data.getContactConstraint();
+			for (ContactCollisionData<F, T> data : this.contactCollisions) {
+				ContactConstraint<F, T> cc = data.getContactConstraint();
 				for (SolvedContact contact : cc.getContacts()) {
-					for (ContactListener<T> listener : contactListeners) {
+					for (ContactListener<F, T> listener : contactListeners) {
 						listener.postSolve(data, contact);
 					}
 				}
@@ -1290,7 +1290,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify the step listener
 		for (int i = 0; i < sSize; i++) {
-			StepListener<T> sl = stepListeners.get(i);
+			StepListener<F, T> sl = stepListeners.get(i);
 			sl.postSolve(this.timeStep, this);
 		}
 
@@ -1316,7 +1316,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		
 		// notify the step listener
 		for (int i = 0; i < sSize; i++) {
-			StepListener<T> sl = stepListeners.get(i);
+			StepListener<F, T> sl = stepListeners.get(i);
 			sl.end(this.timeStep, this);
 		}
 	}
@@ -1341,7 +1341,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			V collision = iterator.next();
 
 			// get the current contact constraint data
-			ContactConstraint<T> contactConstraint = collision.getContactConstraint();
+			ContactConstraint<F, T> contactConstraint = collision.getContactConstraint();
 			
 			// we can exit early if the collision didn't make it to the manifold stage
 			// and there's no existing contacts to report ending
@@ -1367,7 +1367,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				this.constraintGraph.addContactConstraint(contactConstraint);
 				
 				// let any contact listeners churn on it
-				for (ContactListener<T> listener : this.contactListeners) {
+				for (ContactListener<F, T> listener : this.contactListeners) {
 					listener.collision(collision);
 				}
 				
@@ -1553,7 +1553,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		T minBody = null;
 		
 		// used to save a few allocations
-		CollisionItemAdapter<T, BodyFixture> reusableItem = new CollisionItemAdapter<T, BodyFixture>();
+		CollisionItemAdapter<T, F> reusableItem = new CollisionItemAdapter<T, F>();
 		
 		// loop over all the other bodies to find the minimum TOI
 		for (int i = 0; i < size; i++) {
@@ -1590,7 +1590,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 			// test against all fixture pairs taking the fixture
 			// with the smallest time of impact
 			for (int k = 0; k < fc2; k++) {
-				BodyFixture f2 = body2.getFixture(k);
+				F f2 = body2.getFixture(k);
 				
 				// if the second body is static, we can accelerate a bit
 				// more by checking the swept AABB of the first body
@@ -1616,7 +1616,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 				if (f2.isSensor()) continue;
 				
 				for (int j = 0; j < fc1; j++) {
-					BodyFixture f1 = body1.getFixture(j);
+					F f1 = body1.getFixture(j);
 
 					// skip sensor fixtures
 					if (f2.isSensor()) continue;
@@ -1735,9 +1735,9 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 	 * @version 4.2.0
 	 * @since 4.0.0
 	 */
-	private final class WarmStartHandler implements ContactUpdateHandler {
-		private ContactCollisionData<T> data;
-		private final List<ContactListener<T>> listeners;
+	private final class WarmStartHandler implements ContactUpdateHandler<F> {
+		private ContactCollisionData<F, T> data;
+		private final List<ContactListener<F, T>> listeners;
 		
 		public WarmStartHandler() {
 			this.listeners = AbstractPhysicsWorld.this.contactListeners;
@@ -1747,7 +1747,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#getFriction(org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.BodyFixture)
 		 */
 		@Override
-		public double getFriction(BodyFixture fixture1, BodyFixture fixture2) {
+		public double getFriction(F fixture1, F fixture2) {
 			return AbstractPhysicsWorld.this.valueMixer.mixFriction(fixture1.getFriction(), fixture2.getFriction());
 		}
 
@@ -1755,7 +1755,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#getRestitution(org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.BodyFixture)
 		 */
 		@Override
-		public double getRestitution(BodyFixture fixture1, BodyFixture fixture2) {
+		public double getRestitution(F fixture1, F fixture2) {
 			return AbstractPhysicsWorld.this.valueMixer.mixRestitution(fixture1.getRestitution(), fixture2.getRestitution());
 		}
 		
@@ -1763,7 +1763,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		 * @see org.dyn4j.dynamics.contact.ContactUpdateHandler#getRestitutionVelocity(org.dyn4j.dynamics.BodyFixture, org.dyn4j.dynamics.BodyFixture)
 		 */
 		@Override
-		public double getRestitutionVelocity(BodyFixture fixture1, BodyFixture fixture2) {
+		public double getRestitutionVelocity(F fixture1, F fixture2) {
 			return AbstractPhysicsWorld.this.valueMixer.mixRestitutionVelocity(fixture1.getRestitutionVelocity(), fixture2.getRestitutionVelocity());
 		}
 
@@ -1774,7 +1774,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		public void begin(Contact contact) {
 			int size = this.listeners.size();
 			for (int i = 0; i < size; i++) {
-				ContactListener<T> listener = this.listeners.get(i);
+				ContactListener<F, T> listener = this.listeners.get(i);
 				listener.begin(this.data, contact);
 			}
 		}
@@ -1786,7 +1786,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		public void persist(Contact oldContact, Contact newContact) {
 			int size = this.listeners.size();
 			for (int i = 0; i < size; i++) {
-				ContactListener<T> listener = this.listeners.get(i);
+				ContactListener<F, T> listener = this.listeners.get(i);
 				listener.persist(this.data, oldContact, newContact);
 			}
 		}
@@ -1798,7 +1798,7 @@ public abstract class AbstractPhysicsWorld<T extends PhysicsBody, V extends Cont
 		public void end(Contact contact) {
 			int size = this.listeners.size();
 			for (int i = 0; i < size; i++) {
-				ContactListener<T> listener = this.listeners.get(i);
+				ContactListener<F, T> listener = this.listeners.get(i);
 				listener.end(this.data, contact);
 			}
 		}

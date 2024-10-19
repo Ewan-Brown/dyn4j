@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.dyn4j</groupId>
+  <groupId>com.ewan</groupId>
   <artifactId>dyn4j</artifactId>
   <version>5.0.2</version>
 
@@ -26,7 +26,7 @@
     <dyn4j.maven-deploy-plugin.version>3.0.0</dyn4j.maven-deploy-plugin.version>
     <dyn4j.maven-install-plugin.version>3.1.0</dyn4j.maven-install-plugin.version>
     <dyn4j.maven-compiler-plugin.version>3.10.1</dyn4j.maven-compiler-plugin.version>
-    <dyn4j.maven-surefire-plugin.version>3.0.0-M7</dyn4j.maven-surefire-plugin.version>
+<!--    <dyn4j.maven-surefire-plugin.version>3.0.0-M7</dyn4j.maven-surefire-plugin.version>-->
     <dyn4j.maven-source-plugin.version>3.2.1</dyn4j.maven-source-plugin.version>
     <dyn4j.maven-bundle-plugin.version>5.1.8</dyn4j.maven-bundle-plugin.version>
     <dyn4j.maven-javadoc-plugin.version>3.4.1</dyn4j.maven-javadoc-plugin.version>
@@ -135,18 +135,18 @@
               bytecode.
             -->
 
-            <execution>
-              <id>compile-6</id>
-              <goals>
-                <goal>compile</goal>
-              </goals>
-              <configuration>
-                <excludes>
-                  <exclude>module-info.java</exclude>
-                </excludes>
-                <release>6</release>
-              </configuration>
-            </execution>
+<!--            <execution>-->
+<!--              <id>compile-6</id>-->
+<!--              <goals>-->
+<!--                <goal>compile</goal>-->
+<!--              </goals>-->
+<!--              <configuration>-->
+<!--                <excludes>-->
+<!--                  <exclude>module-info.java</exclude>-->
+<!--                </excludes>-->
+<!--                <release>6</release>-->
+<!--              </configuration>-->
+<!--            </execution>-->
           </executions>
 
           <!-- 
@@ -164,14 +164,14 @@
         https://maven.apache.org/surefire/maven-surefire-plugin/
         Used to execute unit tests.
         -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>${dyn4j.maven-surefire-plugin.version}</version>
-          <configuration>
-            <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          </configuration>
-        </plugin>
+<!--        <plugin>-->
+<!--          <groupId>org.apache.maven.plugins</groupId>-->
+<!--          <artifactId>maven-surefire-plugin</artifactId>-->
+<!--          <version>${dyn4j.maven-surefire-plugin.version}</version>-->
+<!--          <configuration>-->
+<!--            <redirectTestOutputToFile>true</redirectTestOutputToFile>-->
+<!--          </configuration>-->
+<!--        </plugin>-->
 
         <!--
         Source plugin.
@@ -248,59 +248,59 @@
         Maven Javadoc plugin.
         https://maven.apache.org/plugins/maven-javadoc-plugin/
         -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>${dyn4j.maven-javadoc-plugin.version}</version>
-          <executions>
-            <execution>
-              <id>attach-javadocs</id>
-              <phase>package</phase>
-              <goals>
-                <goal>jar</goal>
-              </goals>
-              <configuration>
-                <sourceFileExcludes>
-                	<sourceFileExclude>module-info.java</sourceFileExclude>
-                </sourceFileExcludes>
-                <overview>${basedir}/overview.html</overview>
-                <doctitle>dyn4j v${project.version}</doctitle>
-                <show>protected</show>
-                <doclint>all</doclint>
-                <noqualifier>all</noqualifier>
-                <excludePackageNames>org.dyn4j.resources</excludePackageNames>
-                <archive>
-                  <manifestEntries>
-                    <Specification-Title>${project.name}</Specification-Title>
-                    <Specification-Version>${project.version}</Specification-Version>
-                    <Specification-Vendor>dyn4j.org</Specification-Vendor>
-                    <Implementation-Title>${project.name}</Implementation-Title>
-                    <Implementation-Version>${project.version}</Implementation-Version>
-                    <Implementation-Vendor>dyn4j.org</Implementation-Vendor>
-                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
-                  </manifestEntries>
-                </archive>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
+<!--        <plugin>-->
+<!--          <groupId>org.apache.maven.plugins</groupId>-->
+<!--          <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--          <version>${dyn4j.maven-javadoc-plugin.version}</version>-->
+<!--          <executions>-->
+<!--            <execution>-->
+<!--              <id>attach-javadocs</id>-->
+<!--              <phase>package</phase>-->
+<!--              <goals>-->
+<!--                <goal>jar</goal>-->
+<!--              </goals>-->
+<!--              <configuration>-->
+<!--                <sourceFileExcludes>-->
+<!--                	<sourceFileExclude>module-info.java</sourceFileExclude>-->
+<!--                </sourceFileExcludes>-->
+<!--                <overview>${basedir}/overview.html</overview>-->
+<!--                <doctitle>dyn4j v${project.version}</doctitle>-->
+<!--                <show>protected</show>-->
+<!--                <doclint>all</doclint>-->
+<!--                <noqualifier>all</noqualifier>-->
+<!--                <excludePackageNames>org.dyn4j.resources</excludePackageNames>-->
+<!--                <archive>-->
+<!--                  <manifestEntries>-->
+<!--                    <Specification-Title>${project.name}</Specification-Title>-->
+<!--                    <Specification-Version>${project.version}</Specification-Version>-->
+<!--                    <Specification-Vendor>dyn4j.org</Specification-Vendor>-->
+<!--                    <Implementation-Title>${project.name}</Implementation-Title>-->
+<!--                    <Implementation-Version>${project.version}</Implementation-Version>-->
+<!--                    <Implementation-Vendor>dyn4j.org</Implementation-Vendor>-->
+<!--                    <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>-->
+<!--                  </manifestEntries>-->
+<!--                </archive>-->
+<!--              </configuration>-->
+<!--            </execution>-->
+<!--          </executions>-->
+<!--        </plugin>-->
 
         <!--
           Nexus staging plugin.
           https://github.com/sonatype/nexus-maven-plugins/tree/master/staging/maven-plugin
           This allows for deployment to Maven Central via the command line.
         -->
-        <plugin>
-          <groupId>org.sonatype.plugins</groupId>
-          <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>${dyn4j.nexus-staging-maven-plugin.version}</version>
-          <extensions>true</extensions>
-          <configuration>
-            <serverId>ossrh</serverId>
-            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-          </configuration>
-        </plugin>
+<!--        <plugin>-->
+<!--          <groupId>org.sonatype.plugins</groupId>-->
+<!--          <artifactId>nexus-staging-maven-plugin</artifactId>-->
+<!--          <version>${dyn4j.nexus-staging-maven-plugin.version}</version>-->
+<!--          <extensions>true</extensions>-->
+<!--          <configuration>-->
+<!--            <serverId>ossrh</serverId>-->
+<!--            <nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
+<!--            <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+<!--          </configuration>-->
+<!--        </plugin>-->
       </plugins>
     </pluginManagement>
 
@@ -339,9 +339,9 @@
       </plugin>
 
       <!-- Run tests -->
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-      </plugin>
+<!--      <plugin>-->
+<!--        <artifactId>maven-surefire-plugin</artifactId>-->
+<!--      </plugin>-->
 
       <!-- Produce an OSGi bundle -->
       <plugin>
@@ -458,12 +458,4 @@
       
     </profile>
   </profiles>
-  <dependencies>
-  	<dependency>
-  		<groupId>junit</groupId>
-  		<artifactId>junit</artifactId>
-  		<version>4.13.1</version>
-  		<scope>test</scope>
-  	</dependency>
-  </dependencies>
 </project>

@@ -45,7 +45,7 @@ import org.dyn4j.world.PhysicsWorld;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface ContactListener<T extends PhysicsBody> extends WorldEventListener {
+public interface ContactListener<F extends BodyFixture, T extends PhysicsBody<F>> extends WorldEventListener {
 	/**
 	 * Called when two {@link BodyFixture}s begin to overlap, generating a contact point.
 	 * <p>
@@ -57,7 +57,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
-	public abstract void begin(ContactCollisionData<T> collision, Contact contact);
+	public abstract void begin(ContactCollisionData<F, T> collision, Contact contact);
 
 	/**
 	 * Called when two {@link BodyFixture}s remain in contact.
@@ -78,7 +78,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param oldContact the old contact
 	 * @param newContact the new contact
 	 */
-	public abstract void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact);
+	public abstract void persist(ContactCollisionData<F, T> collision, Contact oldContact, Contact newContact);
 
 	/**
 	 * Called when two {@link BodyFixture}s begin to separate and the contact point is no longer valid.
@@ -95,7 +95,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
-	public abstract void end(ContactCollisionData<T> collision, Contact contact);
+	public abstract void end(ContactCollisionData<F, T> collision, Contact contact);
 
 	/**
 	 * Called when a body or fixture is removed from the world that had existing contacts.
@@ -111,7 +111,7 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
-	public abstract void destroyed(ContactCollisionData<T> collision, Contact contact);
+	public abstract void destroyed(ContactCollisionData<F, T> collision, Contact contact);
 	
 	/**
 	 * Called after the {@link ContactConstraint} has been updated after collision detection, but before
@@ -125,14 +125,14 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param collision the collision data
 	 * @since 4.1.0
 	 */
-	public abstract void collision(ContactCollisionData<T> collision);
+	public abstract void collision(ContactCollisionData<F, T> collision);
 	
 	/**
 	 * Called before contact constraints are solved.
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
-	public abstract void preSolve(ContactCollisionData<T> collision, Contact contact);
+	public abstract void preSolve(ContactCollisionData<F, T> collision, Contact contact);
 	
 	/**
 	 * Called after contacts have been solved.
@@ -143,5 +143,5 @@ public interface ContactListener<T extends PhysicsBody> extends WorldEventListen
 	 * @param collision the collision data
 	 * @param contact the contact
 	 */
-	public abstract void postSolve(ContactCollisionData<T> collision, SolvedContact contact);
+	public abstract void postSolve(ContactCollisionData<F, T> collision, SolvedContact contact);
 }

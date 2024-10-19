@@ -26,6 +26,7 @@ package org.dyn4j.world;
 
 import org.dyn4j.collision.CollisionItem;
 import org.dyn4j.collision.CollisionPair;
+import org.dyn4j.collision.Fixture;
 import org.dyn4j.collision.manifold.Manifold;
 import org.dyn4j.collision.narrowphase.Penetration;
 import org.dyn4j.dynamics.BodyFixture;
@@ -44,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisionData<T> {
+public class WorldCollisionData<F extends BodyFixture, T extends PhysicsBody<F>> implements ContactCollisionData<F, T> {
 	/** Is it a broadphase collision? */
 	private boolean broadphaseCollision;
 	
@@ -58,7 +59,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	private boolean contactConstraintCollision;
 	
 	/** The collision pair */
-	private final CollisionPair<CollisionItem<T, BodyFixture>> pair;
+	private final CollisionPair<CollisionItem<T, F>> pair;
 	
 	/** The narrowphase data */
 	private final Penetration penetration;
@@ -67,7 +68,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	private final Manifold manifold;
 	
 	/** The contact data */
-	private final ContactConstraint<T> contactConstraint;
+	private final ContactConstraint<F, T> contactConstraint;
 	
 	// for memory locality
 	
@@ -78,20 +79,20 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	private final T body2;
 	
 	/** The first body's fixture */
-	private final BodyFixture fixture1;
+	private final F fixture1;
 	
 	/** The second body's fixture */
-	private final BodyFixture fixture2;
+	private final F fixture2;
 	
 	/**
 	 * Minimal constructor.
 	 * @param pair the collision pair
 	 */
-	public WorldCollisionData(CollisionPair<CollisionItem<T, BodyFixture>> pair) {
+	public WorldCollisionData(CollisionPair<CollisionItem<T, F>> pair) {
 		this.pair = pair;
 		this.penetration = new Penetration();
 		this.manifold = new Manifold();
-		this.contactConstraint = new ContactConstraint<T>(pair);
+		this.contactConstraint = new ContactConstraint<F, T>(pair);
 		
 		this.broadphaseCollision = false;
 		this.narrowphaseCollision = false;
@@ -108,7 +109,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 * @see org.dyn4j.world.BroadphaseCollisionData#getPair()
 	 */
 	@Override
-	public CollisionPair<CollisionItem<T, BodyFixture>> getPair() {
+	public CollisionPair<CollisionItem<T, F>> getPair() {
 		return this.pair;
 	}
 	
@@ -124,7 +125,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 * @see org.dyn4j.world.BroadphaseCollisionData#getFixture1()
 	 */
 	@Override
-	public BodyFixture getFixture1() {
+	public F getFixture1() {
 		return this.fixture1;
 	}
 
@@ -140,7 +141,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 * @see org.dyn4j.world.BroadphaseCollisionData#getFixture2()
 	 */
 	@Override
-	public BodyFixture getFixture2() {
+	public F getFixture2() {
 		return this.fixture2;
 	}
 
@@ -172,7 +173,7 @@ public class WorldCollisionData<T extends PhysicsBody> implements ContactCollisi
 	 * @see org.dyn4j.world.ContactCollisionData#getContactConstraint()
 	 */
 	@Override
-	public ContactConstraint<T> getContactConstraint() {
+	public ContactConstraint<F, T> getContactConstraint() {
 		return this.contactConstraint;
 	}
 

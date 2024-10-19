@@ -33,31 +33,31 @@ import org.dyn4j.dynamics.BodyFixture;
  * @version 4.2.0
  * @since 4.0.0
  */
-public interface ContactUpdateHandler {
+public interface ContactUpdateHandler<F extends BodyFixture> {
 	/**
-	 * Returns the coefficient of friction given the two {@link BodyFixture}s in contact.
+	 * Returns the coefficient of friction given the two {@link F}s in contact.
 	 * @param fixture1 the first fixture
 	 * @param fixture2 the second fixture
 	 * @return double
 	 */
-	public double getFriction(BodyFixture fixture1, BodyFixture fixture2);
+	public double getFriction(F fixture1, F fixture2);
 	
 	/**
-	 * Returns the coefficient of restitution given the two {@link BodyFixture}s in contact.
+	 * Returns the coefficient of restitution given the two {@link F}s in contact.
 	 * @param fixture1 the first fixture
 	 * @param fixture2 the second fixture
 	 * @return double
 	 */
-	public double getRestitution(BodyFixture fixture1, BodyFixture fixture2);
+	public double getRestitution(F fixture1, F fixture2);
 	
 	/**
-	 * Returns the minimum velocity to apply restitution given the two {@link BodyFixture}s in contact.
+	 * Returns the minimum velocity to apply restitution given the two {@link F}s in contact.
 	 * @param fixture1 the first fixture
 	 * @param fixture2 the second fixture
 	 * @return double
 	 * @since 4.2.0
 	 */
-	public double getRestitutionVelocity(BodyFixture fixture1, BodyFixture fixture2);
+	public double getRestitutionVelocity(F fixture1, F fixture2);
 	
 	/**
 	 * Called when the given contact is a new contact.

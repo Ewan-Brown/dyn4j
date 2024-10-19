@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dyn4j.Epsilon;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -44,7 +45,7 @@ import org.dyn4j.geometry.Vector2;
  * @since 3.2.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class SequentialImpulses<T extends PhysicsBody> implements ContactConstraintSolver<T> {
+public class SequentialImpulses<F extends BodyFixture, T extends PhysicsBody<F>> implements ContactConstraintSolver<F, T> {
 	/**
 	 * Compute the mass coefficient for a {@link SolvableContact}.
 	 * 
@@ -55,7 +56,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @return The mass coefficient
 	 * @since 3.4.0
 	 */
-	private static final double getMassCoefficient(ContactConstraint<?> contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
+	private static final double getMassCoefficient(ContactConstraint<?, ?> contactConstraint, Vector2 r1, Vector2 r2, Vector2 n) {
 		Mass m1 = contactConstraint.getBody1().getMass();
 		Mass m2 = contactConstraint.getBody2().getMass();
 		
@@ -76,9 +77,9 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @param J
 	 * @since 3.4.0
 	 */
-	private static final void updateBodies(ContactConstraint<?> contactConstraint, SolvableContact contact, Vector2 J) {
-		PhysicsBody b1 = contactConstraint.getBody1();
-		PhysicsBody b2 = contactConstraint.getBody2();
+	private static final void updateBodies(ContactConstraint<?, ?> contactConstraint, SolvableContact contact, Vector2 J) {
+	 PhysicsBody<?> b1 = contactConstraint.getBody1();
+	 PhysicsBody<?> b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
 		Mass m2 = b2.getMass();
 		
@@ -99,9 +100,9 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @return The relative velocity vector
 	 * @since 3.4.0
 	 */
-	private static final Vector2 getRelativeVelocity(ContactConstraint<?> contactConstraint, SolvableContact contact) {
-		PhysicsBody b1 = contactConstraint.getBody1();
-		PhysicsBody b2 = contactConstraint.getBody2();
+	private static final Vector2 getRelativeVelocity(ContactConstraint<?,?> contactConstraint, SolvableContact contact) {
+	 PhysicsBody<?> b1 = contactConstraint.getBody1();
+	 PhysicsBody<?> b2 = contactConstraint.getBody2();
 		
 		Vector2 lv1 = contact.r1.cross(b1.getAngularVelocity()).add(b1.getLinearVelocity());
 		Vector2 lv2 = contact.r2.cross(b2.getAngularVelocity()).add(b2.getLinearVelocity());
@@ -113,11 +114,11 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#initialize(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
-	public void initialize(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
+	public void initialize(List<ContactConstraint<F, T>> contactConstraints, TimeStep step, Settings settings) {
 		// loop through the contact constraints
 		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
-			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
+			ContactConstraint<F, T> contactConstraint = contactConstraints.get(i);
 			double restitutionVelocity = contactConstraint.getRestitutionVelocity();
 			
 			// get the contacts
@@ -127,8 +128,8 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			if (cSize == 0) return; 
 			
 			// get the bodies
-			PhysicsBody b1 = contactConstraint.getBody1();
-			PhysicsBody b2 = contactConstraint.getBody2();
+		 PhysicsBody<F> b1 = contactConstraint.getBody1();
+		 PhysicsBody<F> b2 = contactConstraint.getBody2();
 			// get the body transforms
 			Transform t1 = b1.getTransform();
 			Transform t2 = b2.getTransform();
@@ -263,7 +264,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @param step the time step information
 	 * @param settings the current settings
 	 */
-	protected void warmStart(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
+	protected void warmStart(List<ContactConstraint<F, T>> contactConstraints, TimeStep step, Settings settings) {
 		// pre divide for performance
 		double ratio = 1.0 / step.getDeltaTimeRatio();
 		
@@ -272,7 +273,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 		
 		// we have to perform a separate loop to warm start
 		for (int i = 0; i < size; i++) {
-			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
+			ContactConstraint<F, T> contactConstraint = contactConstraints.get(i);
 			
 			// get the penetration axis
 			Vector2 N = contactConstraint.normal;
@@ -300,11 +301,11 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solveVelocityContraints(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
-	public void solveVelocityContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
+	public void solveVelocityContraints(List<ContactConstraint<F, T>> contactConstraints, TimeStep step, Settings settings) {
 		// loop through the contact constraints
 		int size = contactConstraints.size();
 		for (int i = 0; i < size; i++) {
-			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
+			ContactConstraint<F, T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contact list
 			List<SolvableContact> contacts = contactConstraint.contacts;
@@ -503,9 +504,9 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	 * @param a
 	 * @since 3.4.0
 	 */
-	private static final void updateBodies(ContactConstraint<?> contactConstraint, SolvableContact contact1, SolvableContact contact2, Vector2 x, Vector2 a) {
-		PhysicsBody b1 = contactConstraint.getBody1();
-		PhysicsBody b2 = contactConstraint.getBody2();
+	private static final void updateBodies(ContactConstraint<?,?> contactConstraint, SolvableContact contact1, SolvableContact contact2, Vector2 x, Vector2 a) {
+	 PhysicsBody<?> b1 = contactConstraint.getBody1();
+	 PhysicsBody<?> b2 = contactConstraint.getBody2();
 		Mass m1 = b1.getMass();
 		Mass m2 = b2.getMass();
 		
@@ -536,7 +537,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 	/* (non-Javadoc)
 	 * @see org.dyn4j.dynamics.contact.ContactConstraintSolver#solvePositionContraints(java.util.List, org.dyn4j.dynamics.TimeStep, org.dyn4j.dynamics.Settings)
 	 */
-	public boolean solvePositionContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings) {
+	public boolean solvePositionContraints(List<ContactConstraint<F, T>> contactConstraints, TimeStep step, Settings settings) {
 		int size = contactConstraints.size();
 		
 		// immediately return true if there are no contact constraints to solve
@@ -553,7 +554,7 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 		
 		// loop through the contact constraints
 		for (int i = 0; i < size; i++) {
-			ContactConstraint<T> contactConstraint = contactConstraints.get(i);
+			ContactConstraint<F, T> contactConstraint = contactConstraints.get(i);
 			
 			// get the contact list
 			List<SolvableContact> contacts = contactConstraint.contacts;
@@ -561,8 +562,8 @@ public class SequentialImpulses<T extends PhysicsBody> implements ContactConstra
 			if (cSize == 0) continue;
 			
 			// get the bodies
-			PhysicsBody b1 = contactConstraint.getBody1();
-			PhysicsBody b2 = contactConstraint.getBody2();
+		 PhysicsBody<F> b1 = contactConstraint.getBody1();
+		 PhysicsBody<F> b2 = contactConstraint.getBody2();
 			// get their transforms
 			Transform t1 = b1.getTransform();
 			Transform t2 = b2.getTransform();

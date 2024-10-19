@@ -70,6 +70,6 @@ import org.dyn4j.geometry.Transformable;
  * @version 5.0.2
  * @since 1.0.0
  */
-public class Body extends AbstractPhysicsBody implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
+public class Body extends AbstractPhysicsBody<BodyFixture> implements PhysicsBody<BodyFixture>, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
 	
 }

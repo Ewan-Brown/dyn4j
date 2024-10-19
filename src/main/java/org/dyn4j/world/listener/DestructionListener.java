@@ -25,6 +25,7 @@
 package org.dyn4j.world.listener;
 
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -41,7 +42,7 @@ import org.dyn4j.world.PhysicsWorld;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface DestructionListener<T extends PhysicsBody> extends WorldEventListener {
+public interface DestructionListener<F extends BodyFixture, T extends PhysicsBody<F>> extends WorldEventListener {
 	/**
 	 * Called when implicit destruction of a {@link Joint} has occurred.
 	 * <p>
@@ -60,7 +61,7 @@ public interface DestructionListener<T extends PhysicsBody> extends WorldEventLi
 	 * @see PhysicsWorld#removeAllBodiesAndJoints(boolean)
 	 * @param contactConstraint the {@link ContactConstraint} that was destroyed
 	 */
-	public void destroyed(ContactConstraint<T> contactConstraint);
+	public void destroyed(ContactConstraint<F, T> contactConstraint);
 	
 	/**
 	 * Called when implicit destruction of a {@link PhysicsBody} has occurred.

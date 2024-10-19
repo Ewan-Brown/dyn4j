@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.ContactConstraint;
 import org.dyn4j.dynamics.joint.Joint;
@@ -42,7 +43,7 @@ import org.dyn4j.dynamics.joint.Joint;
  * @since 4.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public final class ConstraintGraphNode<T extends PhysicsBody> {
+public final class ConstraintGraphNode<F extends BodyFixture, T extends PhysicsBody<F>> {
 	// node data
 	
 	/** The body */
@@ -51,13 +52,13 @@ public final class ConstraintGraphNode<T extends PhysicsBody> {
 	// edges
 	
 	/** The contact constraints connecting this body and other bodies */
-	protected final List<ContactConstraint<T>> contactConstraints;
+	protected final List<ContactConstraint<F, T>> contactConstraints;
 	
 	/** The joints connecting this body and other bodies */
 	protected final List<Joint<T>> joints;
 
 	/** An unmodifiable view of the contacts list */
-	protected final List<ContactConstraint<T>> contactConstraintsUnmodifiable;
+	protected final List<ContactConstraint<F, T>> contactConstraintsUnmodifiable;
 	
 	/** An unmodifiable view of the joints list */
 	protected final List<Joint<T>> jointsUnmodifiable;
@@ -68,7 +69,7 @@ public final class ConstraintGraphNode<T extends PhysicsBody> {
 	 */
 	public ConstraintGraphNode(T body) {
 		this.body = body;
-		this.contactConstraints = new ArrayList<ContactConstraint<T>>();
+		this.contactConstraints = new ArrayList<ContactConstraint<F, T>>();
 		this.joints = new ArrayList<Joint<T>>();
 		
 		this.jointsUnmodifiable = Collections.unmodifiableList(this.joints);
@@ -95,7 +96,7 @@ public final class ConstraintGraphNode<T extends PhysicsBody> {
 	 * Returns the list of contact constraints this body is connected with.
 	 * @return List&lt;{@link ContactConstraint}&lt;T&gt;&gt;
 	 */
-	public List<ContactConstraint<T>> getContactConstraints() {
+	public List<ContactConstraint<F, T>> getContactConstraints() {
 		return this.contactConstraintsUnmodifiable;
 	}
 }

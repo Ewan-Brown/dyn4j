@@ -55,7 +55,7 @@ import org.dyn4j.world.listener.TimeOfImpactListener;
  * @param <T> the {@link PhysicsBody} type
  * @param <V> the {@link ContactCollisionData} type
  */
-public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionData<T>> extends CollisionWorld<T, BodyFixture, V>, Shiftable, DataContainer {
+public interface PhysicsWorld<F extends BodyFixture, T extends PhysicsBody<F>, V extends ContactCollisionData<F, T>> extends CollisionWorld<T, F, V>, Shiftable, DataContainer {
 	/** The default {@link CollisionBody} count */
 	public static final int DEFAULT_INITIAL_JOINT_CAPACITY = 16;
 	
@@ -350,19 +350,19 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * Returns an unmodifiable list of all the contact listeners registered to this world.
 	 * @return List&lt;{@link ContactListener}&gt;
 	 */
-	public List<ContactListener<T>> getContactListeners();
+	public List<ContactListener<F, T>> getContactListeners();
 	
 	/**
 	 * Returns an unmodifiable list of all the destruction listeners registered to this world.
 	 * @return List&lt;{@link DestructionListener}&gt;
 	 */
-	public List<DestructionListener<T>> getDestructionListeners();
+	public List<DestructionListener<F, T>> getDestructionListeners();
 	
 	/**
 	 * Returns an unmodifiable list of all the step listeners registered to this world.
 	 * @return List&lt;{@link StepListener}&gt;
 	 */
-	public List<StepListener<T>> getStepListeners();
+	public List<StepListener<F, T>> getStepListeners();
 	
 	/**
 	 * Returns an unmodifiable list of all the time of impact listeners registered to this world.
@@ -397,7 +397,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener
 	 * @return boolean
 	 */
-	public boolean removeContactListener(ContactListener<T> listener);
+	public boolean removeContactListener(ContactListener<F, T> listener);
 	
 	/**
 	 * Removes the given destruction listener from this world and returns true if it was removed.
@@ -406,7 +406,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener
 	 * @return boolean
 	 */
-	public boolean removeDestructionListener(DestructionListener<T> listener);
+	public boolean removeDestructionListener(DestructionListener<F, T> listener);
 	
 	/**
 	 * Removes the given step listener from this world and returns true if it was removed.
@@ -415,7 +415,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener
 	 * @return boolean
 	 */
-	public boolean removeStepListener(StepListener<T> listener);
+	public boolean removeStepListener(StepListener<F, T> listener);
 	
 	/**
 	 * Removes the given time of impact listener from this world and returns true if it was removed.
@@ -433,7 +433,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addContactListener(ContactListener<T> listener);
+	public boolean addContactListener(ContactListener<F, T> listener);
 	
 	/**
 	 * Adds the given {@link DestructionListener} to this world.
@@ -442,7 +442,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addDestructionListener(DestructionListener<T> listener);
+	public boolean addDestructionListener(DestructionListener<F, T> listener);
 	
 	/**
 	 * Adds the given {@link StepListener} to this world.
@@ -451,7 +451,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param listener the listener to add
 	 * @return boolean
 	 */
-	public boolean addStepListener(StepListener<T> listener);
+	public boolean addStepListener(StepListener<F, T> listener);
 	
 	/**
 	 * Adds the given {@link TimeOfImpactListener} to this world.
@@ -496,7 +496,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @see ContactConstraintSolver
 	 * @since 3.2.0
 	 */
-	public void setContactConstraintSolver(ContactConstraintSolver<T> constraintSolver);
+	public void setContactConstraintSolver(ContactConstraintSolver<F, T> constraintSolver);
 	
 	/**
 	 * Returns the {@link ContactConstraintSolver}.
@@ -504,7 +504,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @since 3.2.0
 	 * @see #setContactConstraintSolver(ContactConstraintSolver)
 	 */
-	public ContactConstraintSolver<T> getContactConstraintSolver();
+	public ContactConstraintSolver<F, T> getContactConstraintSolver();
 
 	/**
 	 * Sets the CCD broad-phase collision detection algorithm.
@@ -699,7 +699,7 @@ public interface PhysicsWorld<T extends PhysicsBody, V extends ContactCollisionD
 	 * @param body the body
 	 * @return List&lt;{@link ContactConstraint}&gt;
 	 */
-	public List<ContactConstraint<T>> getContacts(T body);
+	public List<ContactConstraint<F, T>> getContacts(T body);
 	
 	/**
 	 * Returns true if the two {@link PhysicsBody}s are joined via a {@link Joint}.

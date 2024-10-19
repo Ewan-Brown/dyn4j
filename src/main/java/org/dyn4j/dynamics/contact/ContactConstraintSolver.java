@@ -26,6 +26,7 @@ package org.dyn4j.dynamics.contact;
 
 import java.util.List;
 
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.Settings;
 import org.dyn4j.dynamics.TimeStep;
@@ -37,14 +38,14 @@ import org.dyn4j.dynamics.TimeStep;
  * @since 3.2.0
  * @param <T> the {@link PhysicsBody} type
  */
-public interface ContactConstraintSolver<T extends PhysicsBody> {
+public interface ContactConstraintSolver<F extends BodyFixture, T extends PhysicsBody<F>> {
 	/**
 	 * Performs initialization of the contact constraints.
 	 * @param contactConstraints the contact constraints to solve
 	 * @param step the time step information
 	 * @param settings the current settings
 	 */
-	public void initialize(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings);
+	public void initialize(List<ContactConstraint<F,T>> contactConstraints, TimeStep step, Settings settings);
 	
 	/**
 	 * Solves the {@link ContactConstraint}s on the velocity level.
@@ -52,7 +53,7 @@ public interface ContactConstraintSolver<T extends PhysicsBody> {
 	 * @param step the time step information
 	 * @param settings the current settings
 	 */
-	public void solveVelocityContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings);
+	public void solveVelocityContraints(List<ContactConstraint<F, T>> contactConstraints, TimeStep step, Settings settings);
 	
 	/**
 	 * Solves the {@link ContactConstraint}s on the position level.
@@ -61,5 +62,5 @@ public interface ContactConstraintSolver<T extends PhysicsBody> {
 	 * @param settings the current settings
 	 * @return boolean true if the constraints have been solved
 	 */
-	public boolean solvePositionContraints(List<ContactConstraint<T>> contactConstraints, TimeStep step, Settings settings);
+	public boolean solvePositionContraints(List<ContactConstraint<F, T>> contactConstraints, TimeStep step, Settings settings);
 }

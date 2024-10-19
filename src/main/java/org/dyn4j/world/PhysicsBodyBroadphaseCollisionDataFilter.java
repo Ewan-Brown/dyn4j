@@ -36,15 +36,15 @@ import org.dyn4j.dynamics.PhysicsBody;
  * @since 4.1.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class PhysicsBodyBroadphaseCollisionDataFilter<T extends PhysicsBody> extends CollisionBodyBroadphaseCollisionDataFilter<T, BodyFixture> implements BroadphaseCollisionDataFilter<T, BodyFixture> {
+public class PhysicsBodyBroadphaseCollisionDataFilter<V extends BodyFixture, T extends PhysicsBody<V>> extends CollisionBodyBroadphaseCollisionDataFilter<T, V> implements BroadphaseCollisionDataFilter<T, V> {
 	/** The world */
-	private final PhysicsWorld<T, ?> world;
+	private final PhysicsWorld<V, T, ?> world;
 	
 	/**
 	 * Minimal constructor.
 	 * @param world the world
 	 */
-	public PhysicsBodyBroadphaseCollisionDataFilter(PhysicsWorld<T, ?> world) {
+	public PhysicsBodyBroadphaseCollisionDataFilter(PhysicsWorld<V, T, ?> world) {
 		this.world = world;
 	}
 	
@@ -52,7 +52,7 @@ public class PhysicsBodyBroadphaseCollisionDataFilter<T extends PhysicsBody> ext
 	 * @see org.dyn4j.collision.broadphase.BroadphaseFilter#isAllowed(org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture, org.dyn4j.collision.Collidable, org.dyn4j.collision.Fixture)
 	 */
 	@Override
-	public boolean isAllowed(T body1, BodyFixture fixture1, T body2, BodyFixture fixture2) {
+	public boolean isAllowed(T body1, V fixture1, T body2, V fixture2) {
 		// check with the base class first
 		if (!super.isAllowed(body1, fixture1, body2, fixture2)) {
 			return false;

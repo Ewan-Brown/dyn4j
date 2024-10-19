@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.TimeStep;
 import org.dyn4j.world.PhysicsWorld;
@@ -35,29 +36,29 @@ import org.dyn4j.world.PhysicsWorld;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class StepListenerAdapter<T extends PhysicsBody> implements StepListener<T> {
+public class StepListenerAdapter<F extends BodyFixture, T extends PhysicsBody<F>> implements StepListener<F, T> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.StepListener#begin(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
 	 */
 	@Override
-	public void begin(TimeStep step, PhysicsWorld<T, ?> world) {}
+	public void begin(TimeStep step, PhysicsWorld<F, T, ?> world) {}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.StepListener#updatePerformed(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
 	 */
 	@Override
-	public void updatePerformed(TimeStep step, PhysicsWorld<T, ?> world) {}
+	public void updatePerformed(TimeStep step, PhysicsWorld<F, T, ?> world) {}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.StepListener#postSolve(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
 	 */
 	@Override
-	public void postSolve(TimeStep step, PhysicsWorld<T, ?> world) {}
+	public void postSolve(TimeStep step, PhysicsWorld<F, T, ?> world) {}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.StepListener#end(org.dyn4j.dynamics.TimeStep, org.dyn4j.world.PhysicsWorld)
 	 */
 	@Override
-	public void end(TimeStep step, PhysicsWorld<T, ?> world) {}
+	public void end(TimeStep step, PhysicsWorld<F, T, ?> world) {}
 
 }

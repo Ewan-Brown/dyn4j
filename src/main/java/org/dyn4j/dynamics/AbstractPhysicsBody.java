@@ -33,6 +33,7 @@ import org.dyn4j.Epsilon;
 import org.dyn4j.Ownable;
 import org.dyn4j.collision.AbstractCollisionBody;
 import org.dyn4j.collision.CollisionBody;
+import org.dyn4j.collision.Fixture;;
 import org.dyn4j.exception.ArgumentNullException;
 import org.dyn4j.exception.ValueOutOfRangeException;
 import org.dyn4j.geometry.AABB;
@@ -51,7 +52,7 @@ import org.dyn4j.geometry.Vector2;
  * @version 5.0.2
  * @since 4.0.0
  */
-public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixture> implements PhysicsBody, CollisionBody<BodyFixture>, Transformable, DataContainer, Ownable {
+public abstract class AbstractPhysicsBody<T extends BodyFixture> extends AbstractCollisionBody<T> implements PhysicsBody<T>, CollisionBody<T>, Transformable, DataContainer, Ownable {
 	/** The {@link Mass} information */
 	protected Mass mass;
 	
@@ -180,41 +181,6 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 * <p>
 	 * Calling this method will reset the body's rest state to not at rest.
 	 */
-	@Override
-	public BodyFixture addFixture(Convex convex) {
-		return this.addFixture(convex, BodyFixture.DEFAULT_DENSITY, BodyFixture.DEFAULT_FRICTION, BodyFixture.DEFAULT_RESTITUTION);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#addFixture(org.dyn4j.geometry.Convex, double)
-	 */
-	@Override
-	public BodyFixture addFixture(Convex convex, double density) {
-		return this.addFixture(convex, density, BodyFixture.DEFAULT_FRICTION, BodyFixture.DEFAULT_RESTITUTION);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.dyn4j.dynamics.PhysicsBody#addFixture(org.dyn4j.geometry.Convex, double, double, double)
-	 */
-	@Override
-	public BodyFixture addFixture(Convex convex, double density, double friction, double restitution) {
-		// make sure the convex shape is not null
-		if (convex == null) 
-			throw new ArgumentNullException("convex");
-		
-		// create the fixture
-		BodyFixture fixture = new BodyFixture(convex);
-		// set the properties
-		fixture.setDensity(density);
-		fixture.setFriction(friction);
-		fixture.setRestitution(restitution);
-		// add the fixture to the body
-		super.addFixture(fixture);
-		// wake the body up
-		this.setAtRest(false);
-		// return the fixture so the caller can configure it
-		return fixture;
-	}
 	
 	/**
 	 * {@inheritDoc}
@@ -222,8 +188,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 * Calling this method will reset the body's rest state to not at rest.
 	 */
 	@Override
-	public List<BodyFixture> removeAllFixtures() {
-		List<BodyFixture> fixtures = super.removeAllFixtures();
+	public List<T> removeAllFixtures() {
+		List<T> fixtures = super.removeAllFixtures();
 		// wake the body if something was removed
 		if (fixtures.size() > 0) {
 			this.setAtRest(false);
@@ -237,7 +203,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 * Calling this method will reset the body's rest state to not at rest.
 	 */
 	@Override
-	public boolean removeFixture(BodyFixture fixture) {
+	public boolean removeFixture(T fixture) {
 		boolean removed = super.removeFixture(fixture);
 		// if something was removed, then wake the body
 		if (removed) {
@@ -252,8 +218,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 * Calling this method will reset the body's rest state to not at rest.
 	 */
 	@Override
-	public BodyFixture removeFixture(int index) {
-		BodyFixture bf = super.removeFixture(index);
+	public T removeFixture(int index) {
+		T bf = super.removeFixture(index);
 		this.setAtRest(false);
 		return bf;
 	}
@@ -264,8 +230,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 * Calling this method will reset the body's rest state to not at rest.
 	 */
 	@Override
-	public BodyFixture removeFixture(Vector2 point) {
-		BodyFixture bf = super.removeFixture(point);
+	public T removeFixture(Vector2 point) {
+		T bf = super.removeFixture(point);
 		// if it was removed, then wake the body
 		if (bf != null) {
 			this.setAtRest(false);
@@ -279,8 +245,8 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 	 * Calling this method will reset the body's rest state to not at rest.
 	 */
 	@Override
-	public List<BodyFixture> removeFixtures(Vector2 point) {
-		List<BodyFixture> fixtures = super.removeFixtures(point);
+	public List<T> removeFixtures(Vector2 point) {
+		List<T> fixtures = super.removeFixtures(point);
 		// if anything was removed, then wake the body
 		if (fixtures.size() > 0) {
 			this.setAtRest(false);
@@ -333,7 +299,7 @@ public abstract class AbstractPhysicsBody extends AbstractCollisionBody<BodyFixt
 			// create a mass object for each shape
 			for (int i = 0; i < size; i++) {
 				// only include fixtures with density greater than zero
-				BodyFixture fixture = this.fixtures.get(i);
+				T fixture = this.fixtures.get(i);
 				if (fixture.density > 0) {
 					Mass mass = fixture.createMass();
 					masses.add(mass);

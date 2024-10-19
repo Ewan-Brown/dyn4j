@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.dyn4j.DataContainer;
 import org.dyn4j.Ownable;
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.geometry.AABB;
 import org.dyn4j.geometry.Convex;
 import org.dyn4j.geometry.Shape;
@@ -57,16 +58,16 @@ public interface CollisionBody<T extends Fixture> extends Transformable, Shiftab
 	 * @throws NullPointerException if fixture is null
 	 */
 	public abstract CollisionBody<T> addFixture(T fixture);
-	
-	/**
-	 * Creates a {@link Fixture} for the given {@link Convex} {@link Shape},
-	 * adds it to this {@link CollisionBody}, and returns it.
-	 * @param convex the {@link Convex} {@link Shape} to add
-	 * @return T the fixture created
-	 * @since 3.2.0
-	 * @throws NullPointerException if convex is null
-	 */
-	public abstract T addFixture(Convex convex);
+//
+//	/**
+//	 * Creates a {@link Fixture} for the given {@link Convex} {@link Shape},
+//	 * adds it to this {@link CollisionBody}, and returns it.
+//	 * @param convex the {@link Convex} {@link Shape} to add
+//	 * @return T the fixture created
+//	 * @since 3.2.0
+//	 * @throws NullPointerException if convex is null
+//	 */
+//	public abstract T addFixture(Convex convex);
 	
 	/**
 	 * Returns the {@link Fixture} at the given index.

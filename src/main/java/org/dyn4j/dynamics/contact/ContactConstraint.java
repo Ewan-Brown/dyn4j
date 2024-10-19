@@ -49,9 +49,9 @@ import org.dyn4j.geometry.Vector2;
  * @since 1.0.0
  * @param <T> The {@link PhysicsBody} type
  */
-public final class ContactConstraint<T extends PhysicsBody> implements Shiftable {
+public final class ContactConstraint<F extends BodyFixture, T extends PhysicsBody<F>> implements Shiftable {
 	/** The collision pair */
-	protected final CollisionPair<CollisionItem<T, BodyFixture>> pair;
+	protected final CollisionPair<CollisionItem<T, F>> pair;
 	
 	/** The {@link Contact}s */
 	protected final List<SolvableContact> contacts;
@@ -96,7 +96,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * Full constructor.
 	 * @param pair the pair
 	 */
-	public ContactConstraint(CollisionPair<CollisionItem<T, BodyFixture>> pair) {
+	public ContactConstraint(CollisionPair<CollisionItem<T, F>> pair) {
 		// set the pair
 		this.pair = pair;
 		// create contact array
@@ -107,9 +107,9 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 		// set the tangent
 		this.tangent = new Vector2();
 		// set coefficients
-		this.friction = BodyFixture.DEFAULT_FRICTION;
-		this.restitution = BodyFixture.DEFAULT_RESTITUTION;
-		this.restitutionVelocity = BodyFixture.DEFAULT_RESTITUTION_VELOCITY;
+		this.friction = F.DEFAULT_FRICTION;
+		this.restitution = F.DEFAULT_RESTITUTION;
+		this.restitutionVelocity = F.DEFAULT_RESTITUTION_VELOCITY;
 		// set the sensor flag (if either fixture is a sensor then the
 		// contact constraint between the fixtures is a sensor)
 		this.sensor = false;
@@ -126,14 +126,14 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @param settings the settings
 	 * @param handler the handler
 	 */
-	public void update(Manifold manifold, Settings settings, ContactUpdateHandler handler) {
+	public void update(Manifold manifold, Settings settings, ContactUpdateHandler<F> handler) {
 		double maxWarmStartDistanceSquared = settings.getMaximumWarmStartDistanceSquared();
 		boolean isWarmStartEnabled = settings.isWarmStartingEnabled();
 		
 		T body1 = this.pair.getFirst().getBody();
 		T body2 = this.pair.getSecond().getBody();
-		BodyFixture fixture1 = this.pair.getFirst().getFixture();
-		BodyFixture fixture2 = this.pair.getSecond().getFixture();
+		F fixture1 = this.pair.getFirst().getFixture();
+		F fixture2 = this.pair.getSecond().getFixture();
 		
 		// reset all other data
 		// NOTE: we need to do this before any listeners are called because the user
@@ -301,7 +301,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @return {@link CollisionPair}
 	 * @since 4.0.0
 	 */
-	public CollisionPair<CollisionItem<T, BodyFixture>> getCollisionPair() {
+	public CollisionPair<CollisionItem<T, F>> getCollisionPair() {
 		return this.pair;
 	}
 	
@@ -322,18 +322,18 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	}
 
 	/**
-	 * Returns the first {@link PhysicsBody}'s {@link BodyFixture}.
-	 * @return {@link BodyFixture} the first {@link PhysicsBody}'s {@link BodyFixture}
+	 * Returns the first {@link PhysicsBody}'s {@link F}.
+	 * @return {@link F} the first {@link PhysicsBody}'s {@link F}
 	 */
-	public BodyFixture getFixture1() {
+	public F getFixture1() {
 		return this.pair.getFirst().getFixture();
 	}
 	
 	/**
-	 * Returns the second {@link PhysicsBody}'s {@link BodyFixture}.
-	 * @return {@link BodyFixture} the second {@link PhysicsBody}'s {@link BodyFixture}
+	 * Returns the second {@link PhysicsBody}'s {@link F}.
+	 * @return {@link F} the second {@link PhysicsBody}'s {@link F}
 	 */
-	public BodyFixture getFixture2() {
+	public F getFixture2() {
 		return this.pair.getSecond().getFixture();
 	}
 	
@@ -362,7 +362,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @param body the body
 	 * @return E
 	 */
-	public BodyFixture getFixture(CollisionBody<?> body) {
+	public F getFixture(CollisionBody<?> body) {
 		T body1 = this.pair.getFirst().getBody();
 		T body2 = this.pair.getSecond().getBody();
 		if (body1 == body) {
@@ -398,7 +398,7 @@ public final class ContactConstraint<T extends PhysicsBody> implements Shiftable
 	 * @param body the body
 	 * @return E
 	 */
-	public BodyFixture getOtherFixture(CollisionBody<?> body) {
+	public F getOtherFixture(CollisionBody<?> body) {
 		T body1 = this.pair.getFirst().getBody();
 		T body2 = this.pair.getSecond().getBody();
 		if (body1 == body) {

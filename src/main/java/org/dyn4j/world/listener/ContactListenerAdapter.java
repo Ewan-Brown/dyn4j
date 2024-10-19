@@ -24,6 +24,7 @@
  */
 package org.dyn4j.world.listener;
 
+import org.dyn4j.dynamics.BodyFixture;
 import org.dyn4j.dynamics.PhysicsBody;
 import org.dyn4j.dynamics.contact.Contact;
 import org.dyn4j.dynamics.contact.SolvedContact;
@@ -36,46 +37,46 @@ import org.dyn4j.world.ContactCollisionData;
  * @since 1.0.0
  * @param <T> the {@link PhysicsBody} type
  */
-public class ContactListenerAdapter<T extends PhysicsBody> implements ContactListener<T> {
+public class ContactListenerAdapter<F extends BodyFixture, T extends PhysicsBody<F>> implements ContactListener<F, T> {
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#begin(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override
-	public void begin(ContactCollisionData<T> collision, Contact contact) {}
+	public void begin(ContactCollisionData<F, T> collision, Contact contact) {}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#end(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override
-	public void end(ContactCollisionData<T> collision, Contact contact) {}
+	public void end(ContactCollisionData<F, T> collision, Contact contact) {}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#destroyed(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override
-	public void destroyed(ContactCollisionData<T> collision, Contact contact) {}
+	public void destroyed(ContactCollisionData<F, T> collision, Contact contact) {}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#persist(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override
-	public void persist(ContactCollisionData<T> collision, Contact oldContact, Contact newContact) {}
+	public void persist(ContactCollisionData<F, T> collision, Contact oldContact, Contact newContact) {}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#collision(org.dyn4j.world.ContactCollisionData)
 	 */
 	@Override
-	public void collision(ContactCollisionData<T> collision) {}
+	public void collision(ContactCollisionData<F, T> collision) {}
 	
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#preSolve(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.Contact)
 	 */
 	@Override
-	public void preSolve(ContactCollisionData<T> collision, Contact contact) {}
+	public void preSolve(ContactCollisionData<F, T> collision, Contact contact) {}
 
 	/* (non-Javadoc)
 	 * @see org.dyn4j.world.listener.ContactListener#postSolve(org.dyn4j.world.ContactCollisionData, org.dyn4j.dynamics.contact.SolvedContact)
 	 */
 	@Override
-	public void postSolve(ContactCollisionData<T> collision, SolvedContact contact) {}
+	public void postSolve(ContactCollisionData<F, T> collision, SolvedContact contact) {}
 }
